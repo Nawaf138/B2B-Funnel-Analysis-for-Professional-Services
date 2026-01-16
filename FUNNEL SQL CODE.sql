@@ -1,117 +1,3 @@
--- جدول الشركات
-CREATE TABLE companies (
-    company_id      SERIAL PRIMARY KEY,
-    company_name    TEXT,
-    industry        TEXT,
-    country         TEXT,
-    created_at      DATE
-);
-
--- جدول الأشخاص (contacts)
-CREATE TABLE contacts (
-    contact_id          SERIAL PRIMARY KEY,
-    company_id          INT REFERENCES companies(company_id),
-    name                TEXT,
-    job_title           TEXT,
-    is_decision_maker   BOOLEAN,
-    influence_score     INT,
-    last_contact_date   DATE
-);
-
--- جدول التفاعلات (engagements)
-CREATE TABLE engagements (
-    engagement_id   SERIAL PRIMARY KEY,
-    company_id      INT REFERENCES companies(company_id),
-    engagement_type TEXT,
-    engagement_date DATE
-);
-
--- جدول الصفقات (deals)
-CREATE TABLE deals (
-    deal_id     SERIAL PRIMARY KEY,
-    company_id  INT REFERENCES companies(company_id),
-    stage       TEXT,
-    amount      NUMERIC(12,2),
-    updated_at  DATE
-);
-
-TRUNCATE companies, contacts, engagements, deals RESTART IDENTITY;
-
-INSERT INTO companies (company_name, industry, country, created_at)
-SELECT
-    'Company ' || g,
-    (ARRAY['Software','Logistics','Retail','Finance','Media','Healthcare'])[1 + (random()*5)::int],
-    (ARRAY['Saudi Arabia','UAE','Kuwait','Qatar','Bahrain'])[1 + (random()*4)::int],
-    DATE '2024-01-01' + (random()*90)::int
-FROM generate_series(1, 1000) g;
-
-INSERT INTO contacts (company_id, name, job_title, is_decision_maker, influence_score, last_contact_date)
-SELECT
-    c.company_id,
-    'Contact ' || c.company_id,
-    (ARRAY['CEO','CTO','Manager','Analyst','Engineer','Marketing Lead'])[1 + (random()*5)::int],
-    (random() < 0.2),  -- 20% Decision Makers
-    40 + (random()*60)::int,
-    c.created_at + (random()*10)::int
-FROM companies c;
-
-DROP TABLE IF EXISTS journey;
-select * from journey where to_won and to_contacted and to_engaged and to_qualified and to_negotiation and to_opportunity = TRUE
-CREATE TABLE journey AS
-SELECT
-    company_id,
-    created_at,
-    (random() < 0.80) AS to_contacted,
-    (random() < 0.60) AS to_engaged,
-    (random() < 0.40) AS to_qualified,
-    (random() < 0.15) AS to_opportunity,   -- التسريب الكبير هنا
-    (random() < 0.10) AS to_negotiation,
-    (random() < 0.8) AS to_won
-FROM companies;
-
--- Contacted
-INSERT INTO engagements (company_id, engagement_type, engagement_date)
-SELECT company_id, 'contact', created_at + 2
-FROM journey
-WHERE to_contacted;
-
--- Engaged
-INSERT INTO engagements (company_id, engagement_type, engagement_date)
-SELECT company_id, 'meeting', created_at + 5
-FROM journey
-WHERE to_contacted AND to_engaged;
-
--- Qualified (demo)
-INSERT INTO engagements (company_id, engagement_type, engagement_date)
-SELECT company_id, 'demo', created_at + 10
-FROM journey
-WHERE to_contacted AND to_engaged AND to_qualified;
-
--- Deals
-INSERT INTO deals (company_id, stage, amount, updated_at)
-SELECT
-    company_id,
-    CASE
-        WHEN to_won THEN 'Won'
-        WHEN to_negotiation THEN 'Negotiation'
-        WHEN to_opportunity THEN 'Opportunity'
-        WHEN to_qualified THEN 'Qualified'
-        ELSE NULL
-    END,
-    (5000 + random()*95000)::numeric(12,2),
-    created_at + 20
-FROM journey
-WHERE to_qualified;
-
-SELECT 
-  (SELECT COUNT(*) FROM companies) AS companies,
-  (SELECT COUNT(*) FROM contacts) AS contacts,
-  (SELECT COUNT(*) FROM engagements) AS engagements,
-  (SELECT COUNT(*) FROM deals) AS deals,
-  (SELECT COUNT(*) FROM journey) AS journey;
-
---_______________________________AI DATASET______________________________________--
-
 CREATE OR REPLACE VIEW funnel_view AS
 WITH company_features AS (
     SELECT
@@ -156,7 +42,7 @@ SELECT
     stage
 FROM company_stage;
 
---_________________________________________________________________--
+--________________________CTE_____________________________--
 
 WITH base AS (
     SELECT
@@ -216,4 +102,5 @@ LATERAL (
         ('Opportunity', opportunity),
         ('Negotiation', negotiation),
         ('Won', won)
+
 ) AS funnel(step, reached);
