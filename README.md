@@ -19,9 +19,14 @@ Despite high lead volume, the company struggled to convert prospects into closed
 
 ## Skills
 
-SQL: CTEs, joins, CASE logic, aggregation
+SQL: View, CTEs, joins, CASE logic, aggregation
 Power BI: DAX, data modeling, ETL, KPI design, funnel visualization
 Business Analysis: Funnel diagnostics, conversion modeling, drop-off analysis
+
+### Why I Used Both a View and a CTE?
+The View is used to store the business logic that assigns each company to the correct funnel stage. It’s reusable, consistent, and acts as a clean data layer for the dashboard.
+
+The CTE is used for temporary calculations like counting leads per stage and computing conversion rates. These metrics don’t need to be stored permanently, so a CTE keeps the query simple and efficient.
 
 ## Results & Recommendations
 
