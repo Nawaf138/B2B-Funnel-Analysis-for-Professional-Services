@@ -5,6 +5,8 @@
 This project analyzes the sales funnel of a B2B professional services company to identify conversion issues, measure funnel performance, and highlight opportunities for improvement. Using SQL and Power BI, the data was extracted, cleaned, modeled, and visualized to track lead progression across seven funnel stages. The analysis revealed a major drop-off between Contacted → Engaged and a final win rate of only 0.40%, indicating significant room for optimization.
 Note: All data used in this project is synthetic and created solely for learning and demonstration purposes.
 
+<img width="436" height="377" alt="image" src="https://github.com/user-attachments/assets/ef4b6b48-5600-4b59-bea0-3d920a9d0011" />
+
 
 ## Business Problem
 
