@@ -45,7 +45,6 @@ The CTE is used for temporary calculations like counting leads per stage and com
 - Improve lead quality and filtering
 - Automate follow-ups to reduce early-stage drop-off
 - Focus sales efforts on industries with higher conversion potential
-- Use weighted forecasting to avoid inflated revenue expectations
 
 ## Next Steps
 
